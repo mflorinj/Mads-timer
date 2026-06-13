@@ -15,9 +15,10 @@ Hver medarbejder logger ind med Microsoft-konto og ser kun egne uger. En admin k
     ├── _shared/
     │   ├── cosmos.js           # Cosmos-klient (opretter db/container automatisk)
     │   └── identity.js         # læser login + admin-tjek
-    ├── me/                     # GET /api/me        -> hvem er jeg + admin?
+    ├── me/                     # GET /api/me        -> hvem er jeg + admin + må redigere katalog?
     ├── timesheet/              # GET/PUT/DELETE /api/timesheet
-    └── employees/              # GET /api/employees  (kun admin)
+    ├── overview/               # GET /api/overview   (kun admin) -> alle medarbejderes timer pr. uge + måned
+    └── catalog/                # GET/PUT /api/catalog -> fælles liste af kunder og opgaver (dropdown-forslag)
 ```
 
 ## Datamodel i Cosmos
@@ -53,8 +54,11 @@ Under *Static Web App → Settings → Environment variables* (Configuration):
 | `ADMIN_USERS` | komma-separeret liste af admin-e-mails, fx `morten@fagerholm.dk` |
 | `COSMOS_DB` | (valgfri) standard `timereg` |
 | `COSMOS_CONTAINER` | (valgfri) standard `timesheets` |
+| `CATALOG_ADMIN_ONLY` | (valgfri) sæt til `true` hvis kun admin må redigere kunde-/opgavelisten. Standard: alle indloggede må redigere. |
 
-`ADMIN_USERS` matcher mod login-navnet (`userDetails`, typisk e-mail). Står man på listen, vises medarbejder-vælgeren og man kan se alles uger skrivebeskyttet.
+`ADMIN_USERS` matcher mod login-navnet (`userDetails`, typisk e-mail). Står man på listen, får man fanen **"Se alle"**: en samlet liste over alle medarbejdere med deres timer for den valgte uge og for måneden. Tryk på en medarbejder for at se ugen i detaljer (skrivebeskyttet). Almindelige medarbejdere ser kun deres egne uger.
+
+Fanen **"Kunder & opgaver"** redigerer en fælles liste, der gemmes som ét dokument i samme container (`employeeId = "__catalog__"`, tælles ikke med i oversigten). Kunder og opgaver herfra vises som forslag i dropdown'erne under registrering, så stavemåder holdes ens på tværs af medarbejdere.
 
 ### 3. Microsoft-login
 `staticwebapp.config.json` sender ikke-loggede brugere til `/.auth/login/aad`.
