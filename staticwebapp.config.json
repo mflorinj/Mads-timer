@@ -4,6 +4,9 @@
     { "route": "/login",  "rewrite": "/.auth/login/aad" },
     { "route": "/logout", "rewrite": "/.auth/logout" },
     { "route": "/.auth/*", "allowedRoles": ["anonymous", "authenticated"] },
+    { "route": "/manifest.json", "allowedRoles": ["anonymous", "authenticated"] },
+    { "route": "/sw.js",         "allowedRoles": ["anonymous", "authenticated"] },
+    { "route": "/icons/*",       "allowedRoles": ["anonymous", "authenticated"] },
     { "route": "/api/*",   "allowedRoles": ["authenticated"] },
     { "route": "/*",       "allowedRoles": ["authenticated"] }
   ],
