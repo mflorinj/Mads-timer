@@ -148,7 +148,8 @@
   .txtflds{display:flex;flex-direction:column;gap:9px}
   .fld{display:flex;flex-direction:column;gap:4px}
   .fld label{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600}
-  .fld input{font:inherit;font-size:16px;padding:10px 9px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink);width:100%}
+  .fld input,.fld select{font:inherit;font-size:16px;padding:10px 9px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink);width:100%}
+  .fld select{-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' stroke='%236B7682' stroke-width='2' fill='none' stroke-linecap='round'/></svg>");background-repeat:no-repeat;background-position:right 12px center;padding-right:30px}
   .fld input[type=time],.fld input[type=number]{text-align:center}
   .erow{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
   .erow .eh{font-size:13px;color:var(--muted)}
@@ -380,6 +381,15 @@
     el("dayPills").innerHTML=html;
   }
 
+  function catSelect(field,list,value,i){
+    var opts='<option value="">– vælg –</option>';
+    var found=false;
+    (list||[]).forEach(function(v){ var sel=(v===value); if(sel)found=true; opts+='<option'+(sel?" selected":"")+' value="'+esc(v)+'">'+esc(v)+'</option>'; });
+    if(value && !found){ opts+='<option selected value="'+esc(value)+'">'+esc(value)+'</option>'; } // bevar evt. eksisterende fritekst
+    opts+='<option value="__other__">+ Anden…</option>';
+    return '<select data-i="'+i+'" data-f="'+field+'" data-sel="1">'+opts+'</select>';
+  }
+
   function renderMobile(){
     renderPills();
     var dayName=DAYS[selectedDay], dayTotal=0, entries="";
@@ -394,8 +404,8 @@
             '<div class="fld"><label>Pause</label><input type="number" min="0" step="5" inputmode="numeric" data-i="'+i+'" data-f="pause" value="'+r.pause+'" placeholder="0"></div>'+
           '</div>'+
           '<div class="txtflds">'+
-            '<div class="fld"><label>Kunde</label><input type="text" list="kunder" data-i="'+i+'" data-f="kunde" value="'+esc(r.kunde)+'" placeholder="Kunde"></div>'+
-            '<div class="fld"><label>Opgave</label><input type="text" list="opgaver" data-i="'+i+'" data-f="opgave" value="'+esc(r.opgave)+'" placeholder="Hvad blev der lavet"></div>'+
+            '<div class="fld"><label>Kunde</label>'+catSelect("kunde",catalog.kunder,r.kunde,i)+'</div>'+
+            '<div class="fld"><label>Opgave</label>'+catSelect("opgave",catalog.opgaver,r.opgave,i)+'</div>'+
           '</div>'+
           '<div class="erow"><span class="eh">Timer: <b data-timer="'+i+'">'+nf(h)+'</b></span>'+(readOnly?"":'<button class="entrydel" data-del="'+i+'">Slet</button>')+'</div>'+
         '</div>';
@@ -517,13 +527,13 @@
   var elEdit=el("editArea");
   elEdit.addEventListener("input",function(e){
     var t=e.target,i=t.getAttribute("data-i"),f=t.getAttribute("data-f");if(i===null||readOnly)return;
+    if(t.getAttribute("data-sel"))return; // dropdowns håndteres i 'change'
     rows[i][f]=t.value;
     var h=rowHours(rows[i]);
     document.querySelectorAll('[data-timer="'+i+'"]').forEach(function(elm){
       elm.textContent=nf(h);
       if(elm.tagName!=="B"){ elm.className="timer t-timer"+(h===0?" zero":""); }
     });
-    // opdater dagens header + pills (uden at miste fokus)
     var dh=el("dayCard")&&el("dayCard").querySelector(".dhead .h");
     if(dh) dh.textContent=nf(dayTotalFor(selectedDay))+" t";
     renderPills();
@@ -531,7 +541,18 @@
   });
   elEdit.addEventListener("change",function(e){
     if(readOnly)return;
-    if(e.target.getAttribute("data-f")==="day"){rows[e.target.getAttribute("data-i")].day=e.target.value;renderPills();scheduleSave();}
+    var t=e.target,f=t.getAttribute("data-f"),i=t.getAttribute("data-i");
+    if(f==="day"){rows[i].day=t.value;renderPills();scheduleSave();return;}
+    if(t.getAttribute("data-sel")){ // mobil kunde/opgave-dropdown
+      if(t.value==="__other__"){
+        var label=(f==="kunde")?"Skriv ny kunde":"Skriv ny opgave";
+        var custom=window.prompt(label,"");
+        rows[i][f]=(custom&&custom.trim())?custom.trim():"";
+      }else{
+        rows[i][f]=t.value;
+      }
+      renderMobile();totals();scheduleSave();return;
+    }
   });
   elEdit.addEventListener("click",function(e){
     var pill=e.target.closest(".daypill");
