@@ -1,4 +1,4 @@
-const CACHE = 'timeseddel-v1';
+const CACHE = 'timeseddel-v2';
 const SHELL = ['/', '/index.html', '/manifest.json'];
 
 self.addEventListener('install', (e) => {
@@ -17,11 +17,9 @@ self.addEventListener('activate', (e) => {
 
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
-
-  // Rør ALDRIG login eller API - de skal altid gå direkte til netværket
+  // Rør ALDRIG login eller API – de skal altid gå direkte til netværket
   if (url.pathname.startsWith('/.auth/') || url.pathname.startsWith('/api/')) return;
   if (e.request.method !== 'GET') return;
-
   // Network-first for app-skallen, med cache som offline-fallback
   e.respondWith(
     fetch(e.request)
