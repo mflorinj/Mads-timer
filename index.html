@@ -128,38 +128,47 @@
   .catadd{display:flex;gap:8px}
   .catadd input{flex:1;font:inherit;font-size:16px;padding:11px 12px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink)}
 
-  /* ---------- Mobil: KUN registrerings-tabellen bliver til kort ---------- */
+  /* Mobil dag-visning (skjult på desktop) */
+  #mobileDays{display:none}
+  .daypills{display:flex;gap:7px;overflow-x:auto;padding:2px 0 12px;-webkit-overflow-scrolling:touch}
+  .daypill{flex:0 0 auto;min-width:48px;padding:9px 6px;border-radius:13px;border:1px solid var(--line);background:var(--surface);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
+  .daypill .dn{font-size:13px;font-weight:700;color:var(--ink)}
+  .daypill .dh{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;min-height:14px}
+  .daypill.active{background:var(--ink);border-color:var(--ink)}
+  .daypill.active .dn{color:#fff}
+  .daypill.has .dh{color:var(--accent);font-weight:700}
+  .daypill.active .dh{color:#cfd6e0}
+  .daycard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .daycard .dhead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
+  .daycard .dhead .t{font-size:19px;font-weight:700}
+  .daycard .dhead .h{font-size:17px;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums}
+  .entry{border-top:1px solid var(--line);padding-top:14px;margin-top:14px}
+  .entry:first-of-type{border-top:none;margin-top:0;padding-top:0}
+  .timeflds{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:9px}
+  .txtflds{display:flex;flex-direction:column;gap:9px}
+  .fld{display:flex;flex-direction:column;gap:4px}
+  .fld label{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600}
+  .fld input{font:inherit;font-size:16px;padding:10px 9px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink);width:100%}
+  .fld input[type=time],.fld input[type=number]{text-align:center}
+  .erow{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+  .erow .eh{font-size:13px;color:var(--muted)}
+  .erow .eh b{color:var(--ink);font-variant-numeric:tabular-nums}
+  .entrydel{font:inherit;font-size:13px;color:#C0392B;background:none;border:1px solid var(--line);border-radius:8px;padding:7px 13px;cursor:pointer}
+  .addentry{margin-top:16px;width:100%;justify-content:center}
+  .weektotal{display:flex;justify-content:space-between;align-items:center;background:var(--ink);color:#fff;border-radius:12px;padding:15px 16px;margin-top:14px;font-weight:700}
+  .weektotal #grandTotalMobile{font-variant-numeric:tabular-nums;font-size:18px}
+  body.ro #mobileDays input{pointer-events:none}
+
+  /* ---------- Mobil ---------- */
   @media (max-width:720px){
     .wrap{padding-left:14px;padding-right:14px}
     .weeknav{margin-left:0;width:100%}
     .weekbox{flex:1;justify-content:center}
     .viewtoggle{width:100%}
     .seg{flex:1}
-    .card:has(.sheet){background:transparent;border:none;overflow:visible}
-    .sheet{min-width:0;width:100%}
-    .sheet thead{display:none}
-    .sheet tbody,.sheet tr,.sheet td{display:block;width:100%}
-    .sheet tbody tr{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 14px;margin-bottom:12px}
-    .sheet tbody td{border-bottom:1px solid var(--line);padding:0;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:46px}
-    .sheet tbody tr td:last-child{border-bottom:none}
-    .sheet tbody td::before{content:attr(data-label);font-size:13px;font-weight:600;color:var(--muted);flex:0 0 auto}
-    .sheet tbody input,.sheet tbody select{width:auto;flex:1 1 60%;text-align:right;font-size:16px}
-    .sheet tbody td input[type=text]{text-align:left}
-    .sheet td.t-day::before{content:""}
-    .sheet td.t-day select{font-weight:700;font-size:17px;text-align:left}
-    .sheet .timer{padding:0}
-    .sheet td.t-timer{font-size:16px}
-    .sheet td.t-timer::before{color:var(--ink)}
-    .sheet td.t-act{justify-content:flex-end}
-    .sheet td.t-act::before{content:""}
-    .sheet .del{width:auto;height:36px;padding:0 14px;font-size:14px;color:#C0392B;border:1px solid var(--line);border-radius:8px}
-    .sheet .del::after{content:" Slet"}
-    .sheet tfoot{display:block}
-    .sheet tfoot tr{display:flex;justify-content:space-between;background:var(--ink);border-radius:12px;padding:14px 16px}
-    .sheet tfoot td{display:block;border:none;padding:0;color:#fff}
-    .sheet tfoot .lbl{color:#cfd6e0}
-    .sheet tfoot .total{color:#fff;font-size:20px}
-    .sheet tfoot td:empty{display:none}
+    #sheetCard{display:none}        /* skjul den brede tabel */
+    #mobileDays{display:block}      /* vis dag-for-dag i stedet */
+    #addRow{display:none}           /* mobil bruger "+ Tilføj opgave" i dagkortet */
     .toolbar button.btn{flex:1 1 auto;justify-content:center}
     .status{margin-left:0;width:100%;justify-content:center;order:5}
     .ovtable td{padding:11px 10px}
@@ -205,7 +214,8 @@
     <div class="banner" id="banner"></div>
     <div class="saved" id="saved"></div>
 
-    <div class="card scroll">
+    <div id="editArea">
+    <div class="card scroll" id="sheetCard">
       <table class="sheet">
         <thead>
           <tr>
@@ -220,6 +230,13 @@
         </tfoot>
       </table>
     </div>
+
+    <div id="mobileDays">
+      <div class="daypills" id="dayPills"></div>
+      <div class="daycard" id="dayCard"></div>
+      <div class="weektotal"><span>Uge i alt</span><span id="grandTotalMobile">0,00 t</span></div>
+    </div>
+    </div><!-- /editArea -->
 
     <div class="toolbar">
       <button class="btn primary" id="addRow">+ Tilføj række</button>
@@ -325,11 +342,14 @@
   var viewing={id:null,name:""};
   var readOnly=false, fromOverview=false, mode="self";
   var catalog={kunder:[],opgaver:[]}, canEditCatalog=true;
+  var selectedDay=(new Date().getDay()+6)%7; // mandag=0 ... søndag=6, default i dag
 
   function setStatus(cls,txt){elStatus.className="status "+cls;elStatusTxt.textContent=txt;}
   function setWeekFields(){elUge.value=cur.week;elAar.value=cur.year;}
 
-  function render(){
+  function render(){ renderTable(); renderMobile(); totals(); }
+
+  function renderTable(){
     elRows.innerHTML="";
     rows.forEach(function(r,i){
       var opts=DAYS.map(function(d){return '<option'+(d===r.day?" selected":"")+'>'+d+'</option>';}).join("");
@@ -342,17 +362,54 @@
         '<td class="t-pause cell-num" data-label="Pause (min)"><input type="number" min="0" step="5" inputmode="numeric" data-i="'+i+'" data-f="pause" value="'+r.pause+'" placeholder="0"></td>'+
         '<td data-label="Kunde"><input type="text" list="kunder" data-i="'+i+'" data-f="kunde" value="'+esc(r.kunde)+'" placeholder="Kunde"></td>'+
         '<td data-label="Opgave"><input type="text" list="opgaver" data-i="'+i+'" data-f="opgave" value="'+esc(r.opgave)+'" placeholder="Hvad blev der lavet"></td>'+
-        '<td class="timer'+(h===0?" zero":"")+' t-timer" data-label="Timer">'+nf(h)+'</td>'+
+        '<td class="timer'+(h===0?" zero":"")+' t-timer" data-label="Timer" data-timer="'+i+'">'+nf(h)+'</td>'+
         '<td class="t-act" data-label=""><button class="del" data-del="'+i+'" aria-label="Slet række">×</button></td>';
       elRows.appendChild(tr);
     });
-    totals();
+  }
+
+  function dayTotalFor(d){ var t=0; rows.forEach(function(r){ if(DAYS.indexOf(r.day)===d) t+=rowHours(r); }); return t; }
+
+  function renderPills(){
+    var html="";
+    for(var d=0;d<7;d++){
+      var dh=dayTotalFor(d);
+      html+='<button class="daypill'+(d===selectedDay?" active":"")+(dh>0?" has":"")+'" data-day="'+d+'">'+
+            '<span class="dn">'+DAYS[d].slice(0,3)+'</span><span class="dh">'+(dh>0?nf(dh):"")+'</span></button>';
+    }
+    el("dayPills").innerHTML=html;
+  }
+
+  function renderMobile(){
+    renderPills();
+    var dayName=DAYS[selectedDay], dayTotal=0, entries="";
+    rows.forEach(function(r,i){
+      if(DAYS.indexOf(r.day)!==selectedDay)return;
+      var h=rowHours(r); dayTotal+=h;
+      entries+=
+        '<div class="entry">'+
+          '<div class="timeflds">'+
+            '<div class="fld"><label>Start</label><input type="time" data-i="'+i+'" data-f="start" value="'+r.start+'"></div>'+
+            '<div class="fld"><label>Slut</label><input type="time" data-i="'+i+'" data-f="slut" value="'+r.slut+'"></div>'+
+            '<div class="fld"><label>Pause</label><input type="number" min="0" step="5" inputmode="numeric" data-i="'+i+'" data-f="pause" value="'+r.pause+'" placeholder="0"></div>'+
+          '</div>'+
+          '<div class="txtflds">'+
+            '<div class="fld"><label>Kunde</label><input type="text" list="kunder" data-i="'+i+'" data-f="kunde" value="'+esc(r.kunde)+'" placeholder="Kunde"></div>'+
+            '<div class="fld"><label>Opgave</label><input type="text" list="opgaver" data-i="'+i+'" data-f="opgave" value="'+esc(r.opgave)+'" placeholder="Hvad blev der lavet"></div>'+
+          '</div>'+
+          '<div class="erow"><span class="eh">Timer: <b data-timer="'+i+'">'+nf(h)+'</b></span>'+(readOnly?"":'<button class="entrydel" data-del="'+i+'">Slet</button>')+'</div>'+
+        '</div>';
+    });
+    if(!entries) entries='<div class="empty" style="padding:4px 0">Ingen registrering for '+dayName.toLowerCase()+' endnu.</div>';
+    el("dayCard").innerHTML='<div class="dhead"><span class="t">'+dayName+'</span><span class="h">'+nf(dayTotal)+' t</span></div>'+entries+
+      (readOnly?"":'<button class="btn primary addentry" id="addEntry">+ Tilføj opgave</button>');
   }
 
   function totals(){
     var total=0,byCust={};
     rows.forEach(function(r){var h=rowHours(r);total+=h;if(h>0){var k=(r.kunde||"").trim()||"Uden kunde";byCust[k]=(byCust[k]||0)+h;}});
     elTotal.textContent=nf(total);
+    var gm=el("grandTotalMobile"); if(gm) gm.textContent=nf(total)+" t";
     var keys=Object.keys(byCust).sort();
     elSum.innerHTML=keys.length?keys.map(function(k){return '<div class="chip"><div class="k">'+esc(k)+'</div><div class="v">'+nf(byCust[k])+'<span>t</span></div></div>';}).join(""):'<div class="empty">Endnu ingen timer registreret.</div>';
   }
@@ -457,13 +514,39 @@
   }
 
   // ---- Events ----
-  elRows.addEventListener("input",function(e){
+  var elEdit=el("editArea");
+  elEdit.addEventListener("input",function(e){
     var t=e.target,i=t.getAttribute("data-i"),f=t.getAttribute("data-f");if(i===null||readOnly)return;
-    rows[i][f]=t.value;var cell=t.closest("tr").querySelector(".timer");var h=rowHours(rows[i]);
-    cell.textContent=nf(h);cell.className="timer t-timer"+(h===0?" zero":"");totals();scheduleSave();
+    rows[i][f]=t.value;
+    var h=rowHours(rows[i]);
+    document.querySelectorAll('[data-timer="'+i+'"]').forEach(function(elm){
+      elm.textContent=nf(h);
+      if(elm.tagName!=="B"){ elm.className="timer t-timer"+(h===0?" zero":""); }
+    });
+    // opdater dagens header + pills (uden at miste fokus)
+    var dh=el("dayCard")&&el("dayCard").querySelector(".dhead .h");
+    if(dh) dh.textContent=nf(dayTotalFor(selectedDay))+" t";
+    renderPills();
+    totals();scheduleSave();
   });
-  elRows.addEventListener("change",function(e){if(readOnly)return;if(e.target.getAttribute("data-f")==="day"){rows[e.target.getAttribute("data-i")].day=e.target.value;scheduleSave();}});
-  elRows.addEventListener("click",function(e){if(readOnly)return;var d=e.target.closest(".del");if(d){rows.splice(parseInt(d.getAttribute("data-del"),10),1);render();scheduleSave();}});
+  elEdit.addEventListener("change",function(e){
+    if(readOnly)return;
+    if(e.target.getAttribute("data-f")==="day"){rows[e.target.getAttribute("data-i")].day=e.target.value;renderPills();scheduleSave();}
+  });
+  elEdit.addEventListener("click",function(e){
+    var pill=e.target.closest(".daypill");
+    if(pill){ selectedDay=parseInt(pill.getAttribute("data-day"),10); renderMobile(); return; }
+    if(readOnly)return;
+    var d=e.target.closest("[data-del]");
+    if(d){ rows.splice(parseInt(d.getAttribute("data-del"),10),1); render(); scheduleSave(); return; }
+    if(e.target.id==="addEntry"){
+      rows.push({day:DAYS[selectedDay],start:"",slut:"",pause:"",kunde:"",opgave:""});
+      render();scheduleSave();
+      var starts=el("dayCard").querySelectorAll('input[data-f="start"]');
+      if(starts.length) starts[starts.length-1].focus();
+      return;
+    }
+  });
 
   el("prev").addEventListener("click",function(){shift(-1);});
   el("next").addEventListener("click",function(){shift(1);});
