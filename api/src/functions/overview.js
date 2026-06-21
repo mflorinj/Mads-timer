@@ -8,7 +8,7 @@ const DAYS = ["Mandag","Tirsdag","Onsdag","Torsdag","Fredag","Lørdag","Søndag"
 const MONTHS = ["januar","februar","marts","april","maj","juni","juli","august","september","oktober","november","december"];
 
 function toMin(t){ if(!t || String(t).indexOf(':') < 0) return null; const p = String(t).split(':'); const h = parseInt(p[0],10), m = parseInt(p[1],10); return (isNaN(h)||isNaN(m)) ? null : h*60+m; }
-function rowHours(r){ const s = toMin(r.start), e = toMin(r.slut); if(s===null||e===null) return 0; let d = e-s; if(d<0) d += 1440; const h = (d - (parseFloat(r.pause)||0))/60; return h>0?h:0; }
+function rowHours(r){ const s = toMin(r.start), e = toMin(r.slut); if(s===null||e===null) return 0; let d = e-s; if(d<0) d += 1440; const h = d/60; return h>0?h:0; }
 function isoWeekMonday(y,w){ const jan4 = new Date(Date.UTC(y,0,4)); const day = jan4.getUTCDay()||7; const wk1 = new Date(jan4); wk1.setUTCDate(jan4.getUTCDate()-(day-1)); const mon = new Date(wk1); mon.setUTCDate(wk1.getUTCDate()+(w-1)*7); return mon; }
 
 app.http('overview', {
