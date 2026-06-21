@@ -318,7 +318,7 @@
   function hasData(rs){return rs.some(function(r){return r.start||r.slut||r.pause||r.kunde||r.opgave;});}
 
   var ONLINE=true, ME=null;
-  function api(path,opts){return fetch("/api/"+path,Object.assign({headers:{"Content-Type":"application/json"},credentials:"same-origin"},opts||{}));}
+  function api(path,opts){return fetch("/api/"+path,Object.assign({cache:"no-store",headers:{"Content-Type":"application/json"},credentials:"same-origin"},opts||{}));}
   var offline={read:function(){try{return JSON.parse(localStorage.getItem(OFFLINE_KEY))||{weeks:{}};}catch(e){return {weeks:{}};}},write:function(o){try{localStorage.setItem(OFFLINE_KEY,JSON.stringify(o));}catch(e){}}};
 
   var DL={
@@ -344,6 +344,7 @@
   var readOnly=false, fromOverview=false, mode="self";
   var catalog={kunder:[],opgaver:[]}, canEditCatalog=true;
   var selectedDay=(new Date().getDay()+6)%7; // mandag=0 ... søndag=6, default i dag
+  var loadSeq=0, ovSeq=0;
 
   function setStatus(cls,txt){elStatus.className="status "+cls;elStatusTxt.textContent=txt;}
   function setWeekFields(){elUge.value=cur.week;elAar.value=cur.year;}
@@ -437,36 +438,48 @@
   // ---- Gem (debounced) ----
   var saveTimer=null;
   function scheduleSave(){if(readOnly)return;setStatus("saving","Gemmer…");clearTimeout(saveTimer);saveTimer=setTimeout(flushSave,600);}
-  async function flushSave(){
+  async function flushSave(forYear,forWeek,forRows){
     clearTimeout(saveTimer);saveTimer=null;if(readOnly)return;
+    var y=forYear!=null?forYear:cur.year,w=forWeek!=null?forWeek:cur.week,rs=forRows||rows;
     try{
-      if(hasData(rows)){await DL.put(cur.year,cur.week,rows);if(!savedWeeks.some(function(s){return s.year===cur.year&&s.week===cur.week;}))savedWeeks.push({year:cur.year,week:cur.week});}
-      else{await DL.del(cur.year,cur.week);savedWeeks=savedWeeks.filter(function(s){return !(s.year===cur.year&&s.week===cur.week);});}
+      if(hasData(rs)){await DL.put(y,w,rs);if(!savedWeeks.some(function(s){return s.year===y&&s.week===w;}))savedWeeks.push({year:y,week:w});}
+      else{await DL.del(y,w);savedWeeks=savedWeeks.filter(function(s){return !(s.year===y&&s.week===w);});}
       renderSaved();setStatus("saved",ONLINE?"Gemt ✓":"Gemt lokalt (offline)");
     }catch(e){setStatus("err","Kunne ikke gemme – prøv igen");}
   }
 
   async function loadWeek(){
+    var seq=++loadSeq,y=cur.year,w=cur.week,emp=viewing.id;
     setWeekFields();setStatus("","Henter…");
-    try{var data=await DL.get(viewing.id,cur.year,cur.week);rows=data?clone(data):freshRows();}
-    catch(e){rows=freshRows();setStatus("err","Kunne ikke hente");}
+    rows=freshRows();render();
+    try{
+      var data=await DL.get(emp,y,w);
+      if(seq!==loadSeq)return;
+      rows=data?clone(data):freshRows();
+    }catch(e){
+      if(seq!==loadSeq)return;
+      rows=freshRows();setStatus("err","Kunne ikke hente");
+    }
     render();renderSaved();
     if(!readOnly && elStatus.className.indexOf("err")<0)setStatus("saved",ONLINE?"Gemt ✓":"Offline");
   }
   async function loadList(){try{savedWeeks=await DL.list(viewing.id)||[];}catch(e){savedWeeks=[];}}
 
   async function goto(y,w){
-    await flushSave();cur={year:y,week:w};setWeekFields();
+    var fromY=cur.year,fromW=cur.week,snap=clone(rows);
+    await flushSave(fromY,fromW,snap);
+    cur={year:y,week:w};setWeekFields();
     if(mode==="all")await renderOverview();else await loadWeek();
   }
   function shift(delta){var w=cur.week+delta,y=cur.year,max=weeksInYear(y);if(w<1){y--;w=weeksInYear(y);}else if(w>max){y++;w=1;}goto(y,w);}
 
   // ---- Se alle ----
   async function renderOverview(){
-    var tb=el("ovRows");
+    var seq=++ovSeq,y=cur.year,w=cur.week,tb=el("ovRows");
     tb.innerHTML='<tr><td colspan="3" class="empty">Henter…</td></tr>';
     try{
-      var data=await DL.overview(cur.year,cur.week);
+      var data=await DL.overview(y,w);
+      if(seq!==ovSeq)return;
       el("ovWeekHead").textContent="Uge "+data.week;
       el("ovMonthHead").textContent=data.monthLabel;
       var wTot=0,mTot=0;
