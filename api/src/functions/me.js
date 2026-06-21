@@ -12,7 +12,7 @@ app.http('me', {
     const catalogAdminOnly = String(process.env.CATALOG_ADMIN_ONLY || '').toLowerCase() === 'true';
     return { jsonBody: {
       userId: p.userId,
-      name: p.userDetails || p.userId,
+      name: id.getDisplayName(p),
       isAdmin: admin,
       canEditCatalog: (!catalogAdminOnly) || admin
     } };

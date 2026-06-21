@@ -30,8 +30,8 @@ app.http('timesheet', {
           try {
             const r = await container.item(docId(year, week), targetRead).read();
             const item = r.resource;
-            return { headers: NO_CACHE, jsonBody: item ? { year: item.year, week: item.week, rows: item.rows } : { year: Number(year), week: Number(week), rows: null } };
-          } catch(e){ return { headers: NO_CACHE, jsonBody: { year: Number(year), week: Number(week), rows: null } }; }
+            return { headers: NO_CACHE, jsonBody: item ? { year: item.year, week: item.week, rows: item.rows, employeeName: item.employeeName || id.getDisplayName(p) } : { year: Number(year), week: Number(week), rows: null, employeeName: id.getDisplayName(p) } };
+          } catch(e){ return { headers: NO_CACHE, jsonBody: { year: Number(year), week: Number(week), rows: null, employeeName: id.getDisplayName(p) } }; }
         }
         const q = { query: 'SELECT c.year, c.week FROM c WHERE c.employeeId = @e', parameters: [{ name: '@e', value: targetRead }] };
         const res = await container.items.query(q, { partitionKey: targetRead }).fetchAll();
@@ -45,7 +45,7 @@ app.http('timesheet', {
         const doc = {
           id: docId(b.year, b.week),
           employeeId: me,
-          employeeName: p.userDetails || me,
+          employeeName: id.getDisplayName(p),
           year: Number(b.year), week: Number(b.week),
           rows: b.rows, updatedAt: new Date().toISOString()
         };

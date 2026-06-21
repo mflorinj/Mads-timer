@@ -174,8 +174,9 @@
 
     .print-only{display:block}
     #printHeader{margin:0 0 14px;padding-bottom:10px;border-bottom:2px solid #000}
-    #printHeader h1{margin:0 0 4px;font-size:20pt;line-height:1.2}
-    #printHeader p{margin:0;font-size:11pt;color:#333}
+    #printHeader h1{margin:0 0 8px;font-size:20pt;line-height:1.2}
+    #printHeader .print-person{margin:0 0 4px;font-size:16pt;color:#000}
+    #printHeader .print-week{margin:0;font-size:11pt;color:#333}
 
     .topbar,.weeknav,.saved,.banner,.toolbar,.ovhint,
     #overview,#catalogView,#mobileDays,header{display:none!important}
@@ -377,7 +378,7 @@
   var DL={
     me:async function(){try{var r=await api("me");if(!r.ok)throw 0;return await r.json();}catch(e){ONLINE=false;return {userId:"local",name:"Lokal tilstand (ikke logget ind)",isAdmin:false};}},
     list:async function(emp){if(ONLINE){var r=await api("timesheet?employeeId="+encodeURIComponent(emp));if(!r.ok)throw new Error();return await r.json();}return Object.keys(offline.read().weeks).map(function(k){var p=k.split("-");return {year:+p[0],week:+p[1]};});},
-    get:async function(emp,y,w){if(ONLINE){var r=await api("timesheet?employeeId="+encodeURIComponent(emp)+"&year="+y+"&week="+w);if(!r.ok)throw new Error();var j=await r.json();return j.rows||null;}var d=offline.read();return d.weeks[keyOf(y,w)]||null;},
+    get:async function(emp,y,w){if(ONLINE){var r=await api("timesheet?employeeId="+encodeURIComponent(emp)+"&year="+y+"&week="+w);if(!r.ok)throw new Error();var j=await r.json();return {rows:j.rows||null,employeeName:j.employeeName||null};}var d=offline.read();return {rows:d.weeks[keyOf(y,w)]||null,employeeName:null};},
     put:async function(y,w,rows){if(ONLINE){var r=await api("timesheet",{method:"PUT",body:JSON.stringify({year:y,week:w,rows:rows})});if(!r.ok)throw new Error();return;}var d=offline.read();d.weeks[keyOf(y,w)]=rows;offline.write(d);},
     del:async function(y,w){if(ONLINE){await api("timesheet?year="+y+"&week="+w,{method:"DELETE"});return;}var d=offline.read();delete d.weeks[keyOf(y,w)];offline.write(d);},
     overview:async function(y,w){var r=await api("overview?year="+y+"&week="+w);if(!r.ok)throw new Error();return await r.json();},
@@ -506,7 +507,8 @@
     try{
       var data=await DL.get(emp,y,w);
       if(seq!==loadSeq)return;
-      rows=data?clone(data):freshRows();
+      if(data&&data.employeeName)viewing.name=data.employeeName;
+      rows=data&&data.rows?clone(data.rows):freshRows();
     }catch(e){
       if(seq!==loadSeq)return;
       rows=freshRows();setStatus("err","Kunne ikke hente");
@@ -525,7 +527,8 @@
   function shift(delta){var w=cur.week+delta,y=cur.year,max=weeksInYear(y);if(w<1){y--;w=weeksInYear(y);}else if(w>max){y++;w=1;}goto(y,w);}
 
   function printWeek(){
-    el("printHeader").innerHTML='<h1>Ugeopgørelse</h1><p><strong>'+esc(viewing.name)+'</strong> · Uge '+cur.week+' / '+cur.year+'</p>';
+    var person=(viewing.id===ME.userId?ME.name:viewing.name)||ME.name||viewing.name||"";
+    el("printHeader").innerHTML='<h1>Ugeopgørelse</h1><p class="print-person"><strong>'+esc(person)+'</strong></p><p class="print-week">Uge '+cur.week+' / '+cur.year+'</p>';
     var total=0;
     el("printRows").innerHTML=rows.map(function(r){
       var h=rowHours(r);total+=h;
