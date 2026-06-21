@@ -161,6 +161,9 @@
   body.ro #mobileDays input{pointer-events:none}
 
   .print-only{display:none}
+  .print-sheet td{padding:6px 10px;vertical-align:top;word-break:break-word}
+  .print-sheet td.num,.print-sheet th.num{text-align:right;font-variant-numeric:tabular-nums}
+  .print-sheet .t-kunde,.print-sheet .t-opgave{min-width:100px}
 
   /* ---------- Udskriv ---------- */
   @media print{
@@ -178,21 +181,15 @@
     #overview,#catalogView,#mobileDays,header{display:none!important}
 
     #selfView{display:block!important}
-    #sheetCard{display:block!important;border:1px solid #ccc;box-shadow:none;margin-top:0}
-    .card.scroll{overflow:visible}
-    table.sheet{min-width:0}
-
-    thead th{background:#15233B!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-    tbody td,tfoot td{border-color:#ccc}
-    tbody input,tbody select{
-      border:none!important;background:transparent!important;
-      padding:2px 0!important;box-shadow:none!important;color:#000!important;
-      -webkit-appearance:none;appearance:none
-    }
-    tbody select{background-image:none!important;padding-right:0!important}
-    .t-act,.del{display:none!important}
-    thead th.t-act,tbody td.t-act,tfoot td:last-child{display:none!important}
-    tfoot .total{color:#000}
+    #editArea{display:none!important}
+    #printSheet{display:block!important;border:1px solid #ccc;margin-top:0}
+    #sheetCard{display:none!important}
+    table.print-sheet{width:100%;min-width:0;border-collapse:collapse}
+    table.print-sheet thead th{background:#15233B!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    table.print-sheet tbody td,table.print-sheet tfoot td{border:1px solid #ccc}
+    table.print-sheet .t-kunde{width:18%}
+    table.print-sheet .t-opgave{width:28%}
+    table.print-sheet tfoot .total{color:#000}
 
     .summary{margin-top:18px;page-break-inside:avoid}
     .summary h2{font-size:10pt;color:#333}
@@ -253,6 +250,21 @@
   <!-- ===== Egen registrering ===== -->
   <div id="selfView">
     <div id="printHeader" class="print-only" aria-hidden="true"></div>
+    <div id="printSheet" class="print-only" aria-hidden="true">
+      <table class="sheet print-sheet">
+        <thead>
+          <tr>
+            <th class="t-day">Ugedag</th><th class="t-time">Start</th><th class="t-time">Slut</th>
+            <th class="t-pause">Pause (min)</th><th class="t-kunde">Kunde</th><th class="t-opgave">Opgave</th>
+            <th class="num t-timer">Timer</th>
+          </tr>
+        </thead>
+        <tbody id="printRows"></tbody>
+        <tfoot>
+          <tr><td class="lbl" colspan="6">I alt timer</td><td class="total num" id="printGrandTotal">0,00</td></tr>
+        </tfoot>
+      </table>
+    </div>
     <div class="banner" id="banner"></div>
     <div class="saved" id="saved"></div>
 
@@ -516,6 +528,12 @@
 
   function printWeek(){
     el("printHeader").innerHTML='<h1>Ugeopgørelse</h1><p><strong>'+esc(viewing.name)+'</strong> · Uge '+cur.week+' / '+cur.year+'</p>';
+    var total=0;
+    el("printRows").innerHTML=rows.map(function(r){
+      var h=rowHours(r);total+=h;
+      return '<tr><td>'+esc(r.day)+'</td><td>'+esc(r.start)+'</td><td>'+esc(r.slut)+'</td><td>'+esc(r.pause)+'</td><td class="t-kunde">'+esc(r.kunde)+'</td><td class="t-opgave">'+esc(r.opgave)+'</td><td class="num">'+nf(h)+'</td></tr>';
+    }).join("");
+    el("printGrandTotal").textContent=nf(total);
     window.print();
   }
 
