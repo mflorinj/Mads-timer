@@ -160,6 +160,46 @@
   .weektotal #grandTotalMobile{font-variant-numeric:tabular-nums;font-size:18px}
   body.ro #mobileDays input{pointer-events:none}
 
+  .print-only{display:none}
+
+  /* ---------- Udskriv ---------- */
+  @media print{
+    @page{margin:1.4cm;size:A4}
+    html,body{background:#fff;color:#000}
+    body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .wrap{max-width:none;padding:0}
+
+    .print-only{display:block}
+    #printHeader{margin:0 0 14px;padding-bottom:10px;border-bottom:2px solid #000}
+    #printHeader h1{margin:0 0 4px;font-size:20pt;line-height:1.2}
+    #printHeader p{margin:0;font-size:11pt;color:#333}
+
+    .topbar,.weeknav,.saved,.banner,.toolbar,.ovhint,
+    #overview,#catalogView,#mobileDays,header{display:none!important}
+
+    #selfView{display:block!important}
+    #sheetCard{display:block!important;border:1px solid #ccc;box-shadow:none;margin-top:0}
+    .card.scroll{overflow:visible}
+    table.sheet{min-width:0}
+
+    thead th{background:#15233B!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    tbody td,tfoot td{border-color:#ccc}
+    tbody input,tbody select{
+      border:none!important;background:transparent!important;
+      padding:2px 0!important;box-shadow:none!important;color:#000!important;
+      -webkit-appearance:none;appearance:none
+    }
+    tbody select{background-image:none!important;padding-right:0!important}
+    .t-act,.del{display:none!important}
+    thead th.t-act,tbody td.t-act,tfoot td:last-child{display:none!important}
+    tfoot .total{color:#000}
+
+    .summary{margin-top:18px;page-break-inside:avoid}
+    .summary h2{font-size:10pt;color:#333}
+    .chip{border-color:#ccc;page-break-inside:avoid}
+    .empty{color:#666}
+  }
+
   /* ---------- Mobil ---------- */
   @media (max-width:720px){
     .wrap{padding-left:14px;padding-right:14px}
@@ -212,6 +252,7 @@
 
   <!-- ===== Egen registrering ===== -->
   <div id="selfView">
+    <div id="printHeader" class="print-only" aria-hidden="true"></div>
     <div class="banner" id="banner"></div>
     <div class="saved" id="saved"></div>
 
@@ -473,6 +514,11 @@
   }
   function shift(delta){var w=cur.week+delta,y=cur.year,max=weeksInYear(y);if(w<1){y--;w=weeksInYear(y);}else if(w>max){y++;w=1;}goto(y,w);}
 
+  function printWeek(){
+    el("printHeader").innerHTML='<h1>Ugeopgørelse</h1><p><strong>'+esc(viewing.name)+'</strong> · Uge '+cur.week+' / '+cur.year+'</p>';
+    window.print();
+  }
+
   // ---- Se alle ----
   async function renderOverview(){
     var seq=++ovSeq,y=cur.year,w=cur.week,tb=el("ovRows");
@@ -591,7 +637,7 @@
   elSaved.addEventListener("click",function(e){var b=e.target.closest(".wk");if(b)goto(parseInt(b.getAttribute("data-y"),10),parseInt(b.getAttribute("data-w"),10));});
 
   el("addRow").addEventListener("click",function(){if(readOnly)return;rows.push({day:"Mandag",start:"",slut:"",pause:"",kunde:"",opgave:""});render();scheduleSave();});
-  el("printBtn").addEventListener("click",function(){window.print();});
+  el("printBtn").addEventListener("click",printWeek);
   el("resetBtn").addEventListener("click",async function(){if(readOnly)return;if(!confirm("Ryd uge "+cur.week+"/"+cur.year+"? Rækkerne tømmes."))return;rows=freshRows();await flushSave();render();renderSaved();});
 
   el("tabSelf").addEventListener("click",function(){viewing={id:ME.userId,name:ME.name};readOnly=false;fromOverview=false;applyReadOnly();showSelf();loadList().then(loadWeek);});
