@@ -74,7 +74,7 @@
   tbody input,tbody select{font:inherit;font-size:15px;width:100%;border:1px solid transparent;background:transparent;padding:9px 8px;border-radius:7px;color:var(--ink)}
   tbody input:hover,tbody select:hover{border-color:var(--line)}
   tbody input:focus,tbody select:focus{background:var(--surface)}
-  td.t-day{width:120px}td.t-time{width:110px}td.t-pause{width:100px}td.t-timer{width:84px}td.t-act{width:44px}
+  td.t-day{width:120px}td.t-time{width:110px}td.t-timer{width:84px}td.t-act{width:44px}
   .cell-num input{text-align:right;font-variant-numeric:tabular-nums}
   .timer{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;padding:9px 10px}
   .timer.zero{color:#AEB6C0;font-weight:500}
@@ -144,7 +144,7 @@
   .daycard .dhead .h{font-size:17px;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums}
   .entry{border-top:1px solid var(--line);padding-top:14px;margin-top:14px}
   .entry:first-of-type{border-top:none;margin-top:0;padding-top:0}
-  .timeflds{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:9px}
+  .timeflds{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:9px}
   .txtflds{display:flex;flex-direction:column;gap:9px}
   .fld{display:flex;flex-direction:column;gap:4px}
   .fld label{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600}
@@ -229,7 +229,7 @@
   <header>
     <div class="htitle">
       <div class="for" id="viewFor">Tidsregistrering</div>
-      <div class="sub">Start, slut og pause pr. dag – timer beregnes automatisk</div>
+      <div class="sub">Start og slut pr. dag – timer beregnes automatisk</div>
     </div>
     <div class="weeknav">
       <button class="nav" id="prev" aria-label="Forrige uge">◀</button>
@@ -255,13 +255,13 @@
         <thead>
           <tr>
             <th class="t-day">Ugedag</th><th class="t-time">Start</th><th class="t-time">Slut</th>
-            <th class="t-pause">Pause (min)</th><th class="t-kunde">Kunde</th><th class="t-opgave">Opgave</th>
+            <th class="t-kunde">Kunde</th><th class="t-opgave">Opgave</th>
             <th class="num t-timer">Timer</th>
           </tr>
         </thead>
         <tbody id="printRows"></tbody>
         <tfoot>
-          <tr><td class="lbl" colspan="6">I alt timer</td><td class="total num" id="printGrandTotal">0,00</td></tr>
+          <tr><td class="lbl" colspan="5">I alt timer</td><td class="total num" id="printGrandTotal">0,00</td></tr>
         </tfoot>
       </table>
     </div>
@@ -274,13 +274,13 @@
         <thead>
           <tr>
             <th class="t-day">Ugedag</th><th class="t-time">Start</th><th class="t-time">Slut</th>
-            <th class="t-pause">Pause (min)</th><th>Kunde</th><th>Opgave</th>
+            <th>Kunde</th><th>Opgave</th>
             <th class="num t-timer">Timer</th><th class="t-act"></th>
           </tr>
         </thead>
         <tbody id="rows"></tbody>
         <tfoot>
-          <tr><td class="lbl" colspan="6">I alt timer</td><td class="total" id="grandTotal">0,00</td><td></td></tr>
+          <tr><td class="lbl" colspan="5">I alt timer</td><td class="total" id="grandTotal">0,00</td><td></td></tr>
         </tfoot>
       </table>
     </div>
@@ -361,14 +361,14 @@
   function isoWeek(d){d=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));var day=d.getUTCDay()||7;d.setUTCDate(d.getUTCDate()+4-day);var ys=new Date(Date.UTC(d.getUTCFullYear(),0,1));return Math.ceil((((d-ys)/86400000)+1)/7);}
   function isoYear(d){d=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));var day=d.getUTCDay()||7;d.setUTCDate(d.getUTCDate()+4-day);return d.getUTCFullYear();}
   function weeksInYear(y){return isoWeek(new Date(y,11,28));}
-  function freshRows(){return DAYS.map(function(d){return {day:d,start:"",slut:"",pause:"",kunde:"",opgave:""};});}
+  function freshRows(){return DAYS.map(function(d){return {day:d,start:"",slut:"",kunde:"",opgave:""};});}
   function keyOf(y,w){return y+"-"+(w<10?"0"+w:w);}
   function clone(o){return JSON.parse(JSON.stringify(o));}
   function nf(n){return n.toLocaleString("da-DK",{minimumFractionDigits:2,maximumFractionDigits:2});}
   function esc(s){return (s||"").replace(/"/g,"&quot;").replace(/</g,"&lt;");}
   function toMin(t){if(!t||t.indexOf(":")<0)return null;var p=t.split(":");var h=parseInt(p[0],10),m=parseInt(p[1],10);return isNaN(h)||isNaN(m)?null:h*60+m;}
-  function rowHours(r){var s=toMin(r.start),e=toMin(r.slut);if(s===null||e===null)return 0;var d=e-s;if(d<0)d+=1440;var h=(d-(parseFloat(r.pause)||0))/60;return h>0?h:0;}
-  function hasData(rs){return rs.some(function(r){return r.start||r.slut||r.pause||r.kunde||r.opgave;});}
+  function rowHours(r){var s=toMin(r.start),e=toMin(r.slut);if(s===null||e===null)return 0;var d=e-s;if(d<0)d+=1440;var h=d/60;return h>0?h:0;}
+  function hasData(rs){return rs.some(function(r){return r.start||r.slut||r.kunde||r.opgave;});}
 
   var ONLINE=true, ME=null;
   function api(path,opts){return fetch("/api/"+path,Object.assign({cache:"no-store",headers:{"Content-Type":"application/json"},credentials:"same-origin"},opts||{}));}
@@ -414,7 +414,6 @@
         '<td class="t-day" data-label="Dag"><select data-i="'+i+'" data-f="day">'+opts+'</select></td>'+
         '<td class="t-time" data-label="Start"><input type="time" data-i="'+i+'" data-f="start" value="'+r.start+'"></td>'+
         '<td class="t-time" data-label="Slut"><input type="time" data-i="'+i+'" data-f="slut" value="'+r.slut+'"></td>'+
-        '<td class="t-pause cell-num" data-label="Pause (min)"><input type="number" min="0" step="5" inputmode="numeric" data-i="'+i+'" data-f="pause" value="'+r.pause+'" placeholder="0"></td>'+
         '<td data-label="Kunde"><input type="text" list="kunder" data-i="'+i+'" data-f="kunde" value="'+esc(r.kunde)+'" placeholder="Kunde"></td>'+
         '<td data-label="Opgave"><input type="text" list="opgaver" data-i="'+i+'" data-f="opgave" value="'+esc(r.opgave)+'" placeholder="Hvad blev der lavet"></td>'+
         '<td class="timer'+(h===0?" zero":"")+' t-timer" data-label="Timer" data-timer="'+i+'">'+nf(h)+'</td>'+
@@ -455,7 +454,6 @@
           '<div class="timeflds">'+
             '<div class="fld"><label>Start</label><input type="time" data-i="'+i+'" data-f="start" value="'+r.start+'"></div>'+
             '<div class="fld"><label>Slut</label><input type="time" data-i="'+i+'" data-f="slut" value="'+r.slut+'"></div>'+
-            '<div class="fld"><label>Pause</label><input type="number" min="0" step="5" inputmode="numeric" data-i="'+i+'" data-f="pause" value="'+r.pause+'" placeholder="0"></div>'+
           '</div>'+
           '<div class="txtflds">'+
             '<div class="fld"><label>Kunde</label>'+catSelect("kunde",catalog.kunder,r.kunde,i)+'</div>'+
@@ -531,7 +529,7 @@
     var total=0;
     el("printRows").innerHTML=rows.map(function(r){
       var h=rowHours(r);total+=h;
-      return '<tr><td>'+esc(r.day)+'</td><td>'+esc(r.start)+'</td><td>'+esc(r.slut)+'</td><td>'+esc(r.pause)+'</td><td class="t-kunde">'+esc(r.kunde)+'</td><td class="t-opgave">'+esc(r.opgave)+'</td><td class="num">'+nf(h)+'</td></tr>';
+      return '<tr><td>'+esc(r.day)+'</td><td>'+esc(r.start)+'</td><td>'+esc(r.slut)+'</td><td class="t-kunde">'+esc(r.kunde)+'</td><td class="t-opgave">'+esc(r.opgave)+'</td><td class="num">'+nf(h)+'</td></tr>';
     }).join("");
     el("printGrandTotal").textContent=nf(total);
     window.print();
@@ -638,7 +636,7 @@
     var d=e.target.closest("[data-del]");
     if(d){ rows.splice(parseInt(d.getAttribute("data-del"),10),1); render(); scheduleSave(); return; }
     if(e.target.id==="addEntry"){
-      rows.push({day:DAYS[selectedDay],start:"",slut:"",pause:"",kunde:"",opgave:""});
+      rows.push({day:DAYS[selectedDay],start:"",slut:"",kunde:"",opgave:""});
       render();scheduleSave();
       var starts=el("dayCard").querySelectorAll('input[data-f="start"]');
       if(starts.length) starts[starts.length-1].focus();
@@ -654,7 +652,7 @@
 
   elSaved.addEventListener("click",function(e){var b=e.target.closest(".wk");if(b)goto(parseInt(b.getAttribute("data-y"),10),parseInt(b.getAttribute("data-w"),10));});
 
-  el("addRow").addEventListener("click",function(){if(readOnly)return;rows.push({day:"Mandag",start:"",slut:"",pause:"",kunde:"",opgave:""});render();scheduleSave();});
+  el("addRow").addEventListener("click",function(){if(readOnly)return;rows.push({day:"Mandag",start:"",slut:"",kunde:"",opgave:""});render();scheduleSave();});
   el("printBtn").addEventListener("click",printWeek);
   el("resetBtn").addEventListener("click",async function(){if(readOnly)return;if(!confirm("Ryd uge "+cur.week+"/"+cur.year+"? Rækkerne tømmes."))return;rows=freshRows();await flushSave();render();renderSaved();});
 
@@ -680,9 +678,9 @@
     var lines=[];
     lines.push(q("Uge nr.")+sep+q(cur.week)+sep+q("År")+sep+q(cur.year)+sep+q("Navn")+sep+q(viewing.name));
     lines.push("");
-    lines.push(["Ugedag","Start","Slut","Pause (min)","Kunde","Opgave","Timer"].map(q).join(sep));
-    var total=0;rows.forEach(function(r){var h=rowHours(r);total+=h;lines.push([r.day,r.start,r.slut,r.pause,r.kunde,r.opgave,nf(h)].map(q).join(sep));});
-    lines.push(["","","","","","I alt",nf(total)].map(q).join(sep));
+    lines.push(["Ugedag","Start","Slut","Kunde","Opgave","Timer"].map(q).join(sep));
+    var total=0;rows.forEach(function(r){var h=rowHours(r);total+=h;lines.push([r.day,r.start,r.slut,r.kunde,r.opgave,nf(h)].map(q).join(sep));});
+    lines.push(["","","","","I alt",nf(total)].map(q).join(sep));
     var blob=new Blob(["\uFEFF"+lines.join("\r\n")],{type:"text/csv;charset=utf-8;"});
     var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="ugeopgoerelse-"+cur.year+"-uge"+cur.week+".csv";
     document.body.appendChild(a);a.click();document.body.removeChild(a);
