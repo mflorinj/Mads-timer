@@ -2,6 +2,8 @@ const { app } = require('@azure/functions');
 const id = require('../shared/identity');
 const db = require('../shared/cosmos');
 
+const NO_CACHE = { 'Cache-Control': 'no-store' };
+
 const DAYS = ["Mandag","Tirsdag","Onsdag","Torsdag","Fredag","Lørdag","Søndag"];
 const MONTHS = ["januar","februar","marts","april","maj","juni","juli","august","september","oktober","november","december"];
 
@@ -15,8 +17,8 @@ app.http('overview', {
   route: 'overview',
   handler: async (request) => {
     const p = id.getPrincipal(request);
-    if(!p) return { status: 401, jsonBody: { error: 'Ikke logget ind' } };
-    if(!id.isAdmin(p)) return { status: 403, jsonBody: { error: 'Kun for admin' } };
+    if(!p) return { status: 401, headers: NO_CACHE, jsonBody: { error: 'Ikke logget ind' } };
+    if(!id.isAdmin(p)) return { status: 403, headers: NO_CACHE, jsonBody: { error: 'Kun for admin' } };
 
     const now = new Date();
     const selYear = parseInt(request.query.get('year'),10) || now.getUTCFullYear();
@@ -43,7 +45,7 @@ app.http('overview', {
       });
       const list = Object.keys(emps).map(function(k){ return emps[k]; }).sort(function(a,b){ return a.employeeName.localeCompare(b.employeeName,'da'); });
       const monthLabel = MONTHS[mMonth].charAt(0).toUpperCase() + MONTHS[mMonth].slice(1) + ' ' + mYear;
-      return { jsonBody: { year: selYear, week: selWeek, monthLabel: monthLabel, employees: list } };
-    } catch(e){ return { status: 500, jsonBody: { error: e.message } }; }
+      return { headers: NO_CACHE, jsonBody: { year: selYear, week: selWeek, monthLabel: monthLabel, employees: list } };
+    } catch(e){ return { status: 500, headers: NO_CACHE, jsonBody: { error: e.message } }; }
   }
 });
